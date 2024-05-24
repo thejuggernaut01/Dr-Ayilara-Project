@@ -5,9 +5,12 @@ const User = require("../models/user");
 
 const { getDB } = require("../utils/database");
 const { validationResult } = require("express-validator");
-const { getMsgForPath, sendEmail } = require("../utils/helper");
+const { getMsgForPath } = require("../utils/helper");
+const verificationEmail = require("../common/utils/emails/verificationEmail");
+const welcomeEmail = require("../common/utils/emails/welcomeEmail");
+const forgotPasswordEmail = require("../common/utils/emails/forgotPasswordEmail");
 
-const PORT = process.env.PORT;
+// const PORT = process.env.PORT;
 
 exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
@@ -87,8 +90,15 @@ exports.postLogin = async (req, res, next) => {
     // if password match, user is authenticated
     if (doMatch) {
       req.session.isLoggedIn = true;
+      req.session.isAdmin = email === "talk2tobi2004@gmail.com";
       req.session.user = user;
-      return req.session.save(async (err) => {
+      // return req.session.save(async (err) => {
+      //   res.redirect("/");
+      // });
+      return req.session.save((err) => {
+        if (err) {
+          return next(err);
+        }
         res.redirect("/");
       });
     }
@@ -176,32 +186,8 @@ exports.postSignUp = async (req, res, next) => {
       );
       await newUser.save();
 
-      // mail options for nodemailer
-      const mailOptions = {
-        from: '"Book Buddy" bookbuddy@gmail.com',
-        to: email,
-        subject: "Verify Your Account on Book Buddy",
-        html: `
-          <main>
-            <p>Dear ${firstName},</p>
-            <p>Welcome to Book Buddy! 📚✨ To ensure the security of your account, we kindly ask you to verify your email address.</p>
-
-            <p>Please click on the following link to complete the verification process: <a href="https://book-buddy.onrender.com/verify-email/${token}">Verification Link</a></p>
-
-            <p>Note: This link is valid for the next 30 minutes. If you don't verify your account within this timeframe, you may need to request a new verification email.</p>
-
-            <p>If you did not sign up for Book Buddy, please ignore this email.</p>
-
-            <p>Thank you for being a part of our reading community!</p>
-
-            <p>Best,<br>
-              Book Buddy Team</p>
-          </main>
-    `,
-      };
-
       // send verification email
-      await sendEmail(res, next, email, mailOptions, token, "signUpEmail");
+      await verificationEmail(email, res, token, next);
     } catch (err) {
       const error = new Error(err);
       error.httpStatusCode = 500;
@@ -239,33 +225,7 @@ exports.verifiedUser = async (req, res, next) => {
       throw error;
     }
 
-    // mail options for nodemailer
-    const mailOptions = {
-      from: '"Book Buddy" bookbuddy@gmail.com',
-      to: user.email,
-      subject: "Welcome to Book Buddy",
-      html: `
-      <main>
-        <p>Dear ${user.firstName},</p>
-
-        <p>Welcome to Book Buddy! 📚✨ We're thrilled to have you join our community of book lovers.</p>
-
-        <p>Explore your personalized dashboard, share your favorite reads, and join discussions with fellow readers. Stay tuned for exciting updates!</p>
-
-        <p>Need assistance? We're here for you. Happy reading!</p>
-
-        <p>Best,<br>
-          Book Buddy Team</p>
-      </main>
-    `,
-    };
-
-    await sendEmail(res, next, user.email, mailOptions, token, "welcome");
-
-    res.render("auth/verified", {
-      path: "/verified",
-      pageTitle: "You're account has been verified!",
-    });
+    await welcomeEmail(user.email, res);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -330,28 +290,7 @@ exports.postReset = (req, res, next) => {
         });
       }
 
-      // mail options for nodemailer
-      const mailOptions = {
-        from: '"Book Buddy" bookbuddy@gmail.com',
-        to: email,
-        subject: "Password Reset - Book Buddy",
-        html: `
-          <main>
-            <p>Dear ${user.firstName},</p>
-
-            <p>We received a request to reset your password on Book Buddy. If you initiated this request, please click the link below to reset your password:</p>
-
-            <p><a href="https://book-buddy.onrender.com/reset/${token}">Reset Password</a></p>
-
-            <p>Note: This link is valid for the next 30 minutes. If you didn't request a password reset, please ignore this email. Your account security is important to us.</p>
-
-            <p>Best,<br>
-                Book Buddy Team</p>
-          </main>
-    `,
-      };
-
-      await sendEmail(res, next, user.email, mailOptions, token, "resetPW");
+      await forgotPasswordEmail(user.email, res, token, next);
     });
   } catch (err) {
     if (!err.statusCode) {

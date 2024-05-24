@@ -13,7 +13,7 @@ router.get("/my-books", isAuthorized, userController.getMyBooks);
 
 router.get("/favorite", isAuthorized, userController.getFavorite);
 
-router.post("/add-book", isAuthorized, userController.postAddBook);
+router.post("/add-book", userController.postAddBook);
 
 router.post("/favorite/:bookId", isAuthorized, userController.addFavorite);
 

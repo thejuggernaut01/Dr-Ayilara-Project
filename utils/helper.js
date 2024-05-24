@@ -52,6 +52,8 @@ const sendEmail = async (res, next, email, mailOptions, token, type) => {
           },
         }
       );
+
+      return;
     }
 
     // // check if type if for signUpEmail
@@ -66,6 +68,8 @@ const sendEmail = async (res, next, email, mailOptions, token, type) => {
           },
         }
       );
+
+      return;
     }
 
     // check if type if for resetPW
@@ -81,6 +85,8 @@ const sendEmail = async (res, next, email, mailOptions, token, type) => {
           },
         }
       );
+
+      return;
     }
 
     // send verification email to user

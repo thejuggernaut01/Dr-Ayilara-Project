@@ -48,6 +48,7 @@ exports.getAddBook = (req, res, next) => {
 };
 
 exports.postAddBook = async (req, res, next) => {
+  console.log("Form submission received");
   const title = req.body.title;
   const description = req.body.description;
   const authorName = req.body.authorName;
@@ -66,7 +67,7 @@ exports.postAddBook = async (req, res, next) => {
   const bookAssets = [...bookFile, ...bookImage];
 
   try {
-    if (bookAssets === 0) {
+    if (bookAssets.length === 0) {
       const error = new Error("No assets attached!");
       error.statusCode = 404;
       throw error;
@@ -146,7 +147,7 @@ exports.postEditBook = async (req, res, next) => {
   const language = req.body.language;
   const readingAge = req.body.readingAge;
   const isbn13 = req.body.isbn13;
-  const userId = req.session.user._id.toString();
+  // const userId = req.session.user._id.toString();
 
   const db = getDB();
 

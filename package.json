@@ -29,6 +29,7 @@
     "nodemon": "^3.0.1",
     "postcss": "^8.4.31",
     "postcss-cli": "^10.1.0",
+    "smtpexpress": "^0.0.9",
     "tailwindcss": "^3.3.5"
   }
 }
