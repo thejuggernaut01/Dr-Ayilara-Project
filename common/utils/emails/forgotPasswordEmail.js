@@ -16,8 +16,8 @@ const forgotPasswordEmail = async (email, res, token, next) => {
       { email },
       {
         $set: {
-          forgotPasswordToken: token,
-          forgotPasswordEmailExpiration: Date.now() + 1800000,
+          resetToken: token,
+          resetTokenExpiration: Date.now() + 1800000,
         },
       },
       { returnOriginal: false }

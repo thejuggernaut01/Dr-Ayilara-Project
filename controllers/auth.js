@@ -317,6 +317,8 @@ exports.getNewPassword = async (req, res, next) => {
       resetTokenExpiration: { $gt: Date.now() },
     });
 
+    console.log(user);
+
     if (!user) {
       return res.redirect("/reset");
     }
